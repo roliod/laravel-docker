@@ -35,6 +35,9 @@ RUN docker-php-ext-install gd
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
+# Start MySQL, Create Test Database
+RUN service mysql start && mysql -u root -e "CREATE DATABASE laravel; CREATE USER 'laravel'@'localhost' IDENTIFIED BY 'laravel'; GRANT ALL PRIVILEGES ON *.* TO 'laravel'@'localhost'; FLUSH PRIVILEGES;"
+
 # Create system user to run Composer and Artisan Commands
 RUN useradd -G www-data,root -u $uid -d /home/$user $user
 RUN mkdir -p /home/$user/.composer && \
