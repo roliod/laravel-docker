@@ -1,0 +1,69 @@
+version: "3.7"
+services:
+    app:
+        build:
+            args:
+                user: sammy
+                uid: 1000
+            context: ./
+            dockerfile: Dockerfile
+        image: laravel
+        container_name: laravel-service
+        restart: always
+        working_dir: /var/www/
+        volumes:
+            - ./:/var/www
+        networks:
+            - laravel
+
+    db:
+        image: mysql:5.7
+        container_name: laravel-db
+        restart: always
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_USER: ${DB_USERNAME}
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        ports:
+            - 3306:3306
+        volumes:
+            - ./.docker/mysql/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf:cached
+        networks:
+            - laravel
+
+    dbtest:
+        image: mysql:5.7
+        container_name: laravel-db-test
+        restart: always
+        environment:
+            MYSQL_DATABASE: ${TEST_DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${TEST_DB_PASSWORD}
+            MYSQL_PASSWORD: ${TEST_DB_PASSWORD}
+            MYSQL_USER: ${TEST_DB_USERNAME}
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        ports:
+            - 3307:3306
+        volumes:
+            - ./.docker/mysql/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf:cached
+        networks:
+            - laravel
+
+    nginx:
+        image: nginx:alpine
+        container_name: laravel-nginx
+        restart: always
+        ports:
+            - 8000:80
+        volumes:
+            - ./:/var/www
+            - ./.docker/nginx:/etc/nginx/conf.d/
+        networks:
+            - laravel
+
+networks:
+    laravel:
+        driver: bridge
