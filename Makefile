@@ -4,7 +4,12 @@ container-start: ## start container
 	docker-compose up -d
 
 container-build: ## build container
+	if ! [ -f .env ];then cp .env.example .env;fi
 	docker-compose up -d --build
+	docker-compose exec app composer install
+	docker-compose exec app php artisan key:generate
+	docker-compose exec app php artisan migrate
+	docker-compose exec app php artisan db:seed
 
 container-stop: ## stop container
 	docker-compose stop
