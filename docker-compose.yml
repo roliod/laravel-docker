@@ -18,10 +18,10 @@ services:
         container_name: laravel-db
         restart: always
         environment:
-            MYSQL_DATABASE: 'laravel'
-            MYSQL_ROOT_PASSWORD: 'laravel'
-            MYSQL_PASSWORD: 'laravel'
-            MYSQL_USER: 'laravel'
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_USER: ${DB_USERNAME}
             SERVICE_TAGS: dev
             SERVICE_NAME: mysql
         ports:

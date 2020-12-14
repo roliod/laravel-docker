@@ -27,14 +27,8 @@ RUN docker-php-ext-install gd
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-# Start MySQL, Create Test Database
-RUN service mysql start && mysql -u root -e "CREATE DATABASE laravel; CREATE USER 'laravel'@'localhost' IDENTIFIED BY 'laravel'; GRANT ALL PRIVILEGES ON *.* TO 'laravel'@'localhost'; FLUSH PRIVILEGES;"
-
 # Set working directory
 WORKDIR /var/www
-
-USER $user
