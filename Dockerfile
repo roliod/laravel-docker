@@ -1,16 +1,12 @@
 FROM php:7.4-fpm
 
-# Arguments defined in docker-compose.yml
-ARG user
-ARG uid
-
 # Copy existing application directory contents
 COPY . /var/www
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
-    mariadb-client \
+    default-mysql-client \
     libzip-dev \
     libpng-dev \
     libjpeg62-turbo-dev \
@@ -21,27 +17,22 @@ RUN apt-get update && apt-get install -y \
     vim \
     unzip \
     git \
-    curl \
-    mariadb-server
-
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+    curl
 
 # Install extensions
 RUN docker-php-ext-install pdo_mysql zip exif pcntl
 RUN docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/
 RUN docker-php-ext-install gd
 
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 # Start MySQL, Create Test Database
 RUN service mysql start && mysql -u root -e "CREATE DATABASE laravel; CREATE USER 'laravel'@'localhost' IDENTIFIED BY 'laravel'; GRANT ALL PRIVILEGES ON *.* TO 'laravel'@'localhost'; FLUSH PRIVILEGES;"
-
-# Create system user to run Composer and Artisan Commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
 
 # Set working directory
 WORKDIR /var/www
